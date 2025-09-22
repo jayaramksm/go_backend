@@ -107,6 +107,7 @@ func GetUserByID(c *gin.Context) {
 }
 
 // Update User
+
 func UpdateUser(c *gin.Context) {
 	id := c.Param("id")
 	objID, err := primitive.ObjectIDFromHex(id)
@@ -125,6 +126,7 @@ func UpdateUser(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
+	
 	uidStr, _ := c.Get("user_id")     // comes from JWT middleware
 	loggedInUserID := uidStr.(string) // convert interface{} → string
 
