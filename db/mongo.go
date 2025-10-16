@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"log"
+	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -12,8 +13,9 @@ import (
 var DB *mongo.Database
 
 func Connect() {
+	MONGO_URI := os.Getenv("MONGO_URI")
 	// MongoDB connection URI
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb+srv://jayaram:jayaram@cluster0.vlqwqiz.mongodb.net/go_crud?retryWrites=true&w=majority&appName=Cluster0"))
+	client, err := mongo.NewClient(options.Client().ApplyURI(MONGO_URI))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -27,5 +29,5 @@ func Connect() {
 	}
 
 	DB = client.Database("go_crud")
-	log.Println("✅ Connected to MongoDB")
+	log.Println("✅ Connected to MongoDB", MONGO_URI)
 }

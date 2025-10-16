@@ -14,6 +14,7 @@ import (
 
 	"go_backend/db"
 	"go_backend/models"
+	"os"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -63,8 +64,8 @@ func Signup(c *gin.Context) {
 func Login(c *gin.Context) {
 	var input models.Auth
 	var userCollection *mongo.Collection = db.DB.Collection("auth")
-	var jwtKey = []byte("my_secret_key") // keep in env variable
-
+	var jwtKey = []byte(os.Getenv("JWT_SECRET")) // keep in env variable
+	log.Println("Hash error===>:", jwtKey)
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

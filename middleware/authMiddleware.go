@@ -6,14 +6,16 @@ import (
 	"net/http"
 	"strings"
 
+	"os"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtKey = []byte("my_secret_key") // Same key used in Login()
-
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		jwtKey := []byte(os.Getenv("JWT_SECRET"))
+
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header missing or invalid"})

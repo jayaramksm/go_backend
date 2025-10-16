@@ -3,13 +3,24 @@ package main
 import (
 	"go_backend/db"
 	"go_backend/routes"
+	"log"
+	"os"
+
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
 	// Connect to MongoDB
+	err := godotenv.Load()
 	db.Connect()
 
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	// Access environment variables
+	port := os.Getenv("PORT")
 	r := gin.Default()
 
 	// // Routes
@@ -23,5 +34,5 @@ func main() {
 	routes.UserRoutes(r)
 	routes.AuthRoutes(r)
 
-	r.Run(":8080") // Start server on localhost:8080
+	r.Run(":" + port) // Start server on localhost:8080
 }
