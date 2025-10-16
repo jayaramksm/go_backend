@@ -40,7 +40,9 @@ func AuthMiddleware() gin.HandlerFunc {
 		// (Optional) set user info in context
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if ok {
+			log.Printf("user_auth==>", claims["role"], claims, claims["user_id"])
 			c.Set("user_id", claims["user_id"])
+			c.Set("role", claims["role"])
 		}
 
 		c.Next()

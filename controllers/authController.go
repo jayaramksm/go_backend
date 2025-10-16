@@ -30,7 +30,7 @@ func Signup(c *gin.Context) {
 	var userCollection *mongo.Collection = db.DB.Collection("auth")
 
 	// Check if user exists
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 	count, _ := userCollection.CountDocuments(ctx, bson.M{"email": user.Email})
 	if count > 0 {
@@ -49,7 +49,7 @@ func Signup(c *gin.Context) {
 	user.ID = primitive.NewObjectID()
 
 	// Insert into DB
-	log.Printf("user_auth==>", user)
+	log.Printf("user_auth==>", user, user.Role)
 	_, err = userCollection.InsertOne(ctx, user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create users.....", "err": err})
@@ -90,6 +90,7 @@ func Login(c *gin.Context) {
 	// Generate JWT Token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": dbUser.ID.Hex(),
+		"role":    dbUser.Role,
 		"exp":     time.Now().Add(time.Hour * 24).Unix(),
 	})
 
