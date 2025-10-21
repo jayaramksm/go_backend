@@ -126,7 +126,7 @@ func UpdateUser(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
-	
+
 	uidStr, _ := c.Get("user_id")     // comes from JWT middleware
 	loggedInUserID := uidStr.(string) // convert interface{} → string
 
@@ -141,15 +141,18 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	update := bson.M{
-		"$set": bson.M{
-			"name":  user.Name,
-			"email": user.Email,
-			"age":   user.Age,
-		},
-	}
+	// update := bson.M{
+	// 	"$set": bson.M{
+	// 		"name":  user.Name,
+	// 		"email": user.Email,
+	// 		"age":   user.Age,
+	// 	},
+	// }
+	// _, err = collection.UpdateOne(ctx, bson.M{"_id": objID}, update)
+	//or
+	user.UserID = loggedInUserID
+	_, err = collection.UpdateOne(ctx, bson.M{"_id": objID}, bson.M{"$set": user})
 
-	_, err = collection.UpdateOne(ctx, bson.M{"_id": objID}, update)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
 		return

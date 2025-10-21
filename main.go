@@ -31,8 +31,9 @@ func main() {
 	// r.DELETE("/users/:id", handlers.DeleteUser)
 
 	// Register routes
-	routes.UserRoutes(r)
 	routes.AuthRoutes(r)
+	routes.UserRoutes(r)
+	routes.MoviesRouters(r)
 
 	r.Run(":" + port) // Start server on localhost:8080
 }
