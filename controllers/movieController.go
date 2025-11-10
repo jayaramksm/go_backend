@@ -29,7 +29,7 @@ func GetMovies(c *gin.Context) {
 	defer cursor.Close(ctx)
 	var movies []models.Movies
 	if err = cursor.All(ctx, &movies); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse users"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse movies"})
 		return
 	}
 
@@ -66,9 +66,44 @@ func CreateMovies(c *gin.Context) {
 		log.Println("Insert result:", res.InsertedID)
 	}
 
-	// c.JSON(http.StatusCreated, user)
+	// c.JSON(http.StatusCreated, movie)
 	c.JSON(http.StatusCreated, gin.H{
-		"user":  movie,
+		"movie": movie,
 		"debug": "movie successfully inserted into DB",
 	})
+}
+
+func DeleteMovie(c *gin.Context) {
+	id := c.Param("id")
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	collection := db.DB.Collection("movies")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var dbmovie models.Movies
+	err = collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&dbmovie)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "movie not found"})
+		return
+	}
+	uidStr, _ := c.Get("user_id")     // comes from JWT middleware
+	loggedInUserID := uidStr.(string) // convert interface{} → string
+
+	// Compare DB movie.movie with logged-in movie ID
+	if dbmovie.UserID != loggedInUserID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized"})
+		return
+	}
+	_, err = collection.DeleteOne(ctx, bson.M{"_id": objID})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete movie"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "movie deleted"})
 }
